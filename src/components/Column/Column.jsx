@@ -1,7 +1,7 @@
 import React from "react";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 
-const Column = ({ itemsId, id, ITEMS }) => {
+const Column = ({ itemsOrder, id, ITEMS }) => {
   return (
     <Droppable droppableId={id}>
       {(provided) => (
@@ -10,7 +10,7 @@ const Column = ({ itemsId, id, ITEMS }) => {
           ref={provided.innerRef}
           className="flex flex-col w-full min-h-60 h-fit"
         >
-          {itemsId.map((item_id, index) => {
+          {itemsOrder.map((item_id, index) => {
             const item = ITEMS[item_id];
 
             return (

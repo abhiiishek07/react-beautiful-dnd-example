@@ -13,17 +13,17 @@ const INITIAL_COL_DATA = {
   "column-1": {
     id: "column-1",
     title: "Column 1",
-    itemsId: ["item-1", "item-2", "item-3"],
+    itemsOrder: ["item-1", "item-2", "item-3"],
   },
   "column-2": {
     id: "column-2",
     title: "Column 2",
-    itemsId: ["item-4", "item-5"],
+    itemsOrder: ["item-4", "item-5"],
   },
   "column-3": {
     id: "column-3",
     title: "Column 3",
-    itemsId: ["item-6", "item-7", "item-8"],
+    itemsOrder: ["item-6", "item-7", "item-8"],
   },
 };
 
@@ -95,28 +95,31 @@ export default function Home() {
       reorderedColumns.splice(destinationIndex, 0, removedItem);
 
       setColumnsOrder(reorderedColumns);
+      //save the reordered column in database
 
       return;
     } else {
       //changes within same column
       if (source.droppableId === destination.droppableId) {
         const source_col_id = source.droppableId;
-        const new_items_id_collection = [...data[source_col_id].itemsId];
+        const new_items_id_collection = [...data[source_col_id].itemsOrder];
         const [deleted_item_id] = new_items_id_collection.splice(
           sourceIndex,
           1
         );
         new_items_id_collection.splice(destinationIndex, 0, deleted_item_id);
         const new_data = { ...data };
-        new_data[source_col_id].itemsId = new_items_id_collection;
+        new_data[source_col_id].itemsOrder = new_items_id_collection;
         setData(new_data);
+
+        //update the db
       } else {
         //changes within different col
         const source_col_id = source.droppableId,
           dest_col_id = destination.droppableId;
 
-        const new_source_items_id_collc = [...data[source_col_id].itemsId];
-        const new_dest_items_id_collc = [...data[dest_col_id].itemsId];
+        const new_source_items_id_collc = [...data[source_col_id].itemsOrder];
+        const new_dest_items_id_collc = [...data[dest_col_id].itemsOrder];
         const [deleted_item_id] = new_source_items_id_collc.splice(
           sourceIndex,
           1
@@ -124,10 +127,12 @@ export default function Home() {
 
         new_dest_items_id_collc.splice(destinationIndex, 0, deleted_item_id);
         const new_data = { ...data };
-        new_data[source_col_id].itemsId = new_source_items_id_collc;
-        new_data[dest_col_id].itemsId = new_dest_items_id_collc;
+        new_data[source_col_id].itemsOrder = new_source_items_id_collc;
+        new_data[dest_col_id].itemsOrder = new_dest_items_id_collc;
 
         setData(new_data);
+
+        //update the db
       }
     }
   };
@@ -137,39 +142,42 @@ export default function Home() {
       <p className="font-bold text-4xl bg-gradient-to-r from-purple-600 via-blue-400 to-indigo-400  mt-10 text-transparent bg-clip-text">
         React Beautiful DND Example
       </p>
-
+      {/* Set up DragDropContext */}
       <DragDropContext onDragEnd={handleDragDrop}>
+        {/* Render Droppable area for columns */}
         <Droppable droppableId="ROOT" type="COLUMN" direction="HORIZONTAL">
           {(provided) => (
             <div
-              className="flex items-center w-full max-w-6xl justify-center border min-h-96 py-4 mt-6 rounded-md"
+              className="flex  items-center w-full md:max-w-6xl justify-center border min-h-96 py-4 mt-6 rounded-md overflow-x-scroll md:overflow-hidden"
               {...provided.droppableProps}
               ref={provided.innerRef}
             >
-              {columnsOrder.map((col_id, index) => {
-                const column_data = data[col_id];
+              {/* Map through columnsOrder to render each column */}
+              {columnsOrder.map((colId, index) => {
+                const columnData = data[colId];
                 return (
                   <Draggable
-                    draggableId={column_data.id}
-                    key={column_data.id}
+                    draggableId={columnData.id}
+                    key={columnData.id}
                     index={index}
                   >
                     {(provided) => (
                       <div
-                        className="rounded-md border flex flex-col  max-w-xs mx-3 "
+                        className="rounded-md border flex flex-col max-w-xs mx-3"
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                       >
                         <div
                           {...provided.dragHandleProps}
-                          className="flex items-center justify-between w-80 gap-2  hover:bg-gray-600 p-4 border-b border-b-gray-700 rounded-t-md"
+                          className="flex items-center justify-between w-80 gap-2 hover:bg-gray-600 p-4 border-b border-b-gray-700 rounded-t-md"
                         >
                           <p className="text-xl font-bold">
-                            {column_data.title}
+                            {columnData.title}
                           </p>
                         </div>
 
-                        <Column {...column_data} ITEMS={ITEMS} />
+                        {/* Render items within the column */}
+                        <Column {...columnData} ITEMS={ITEMS} />
                       </div>
                     )}
                   </Draggable>
